@@ -53,6 +53,25 @@ items:
                   servicePort: {{ $servicePort }}
       {{- end }}
       {{- end -}}
+        - host: {{ $ingressValues.extraHostName }}
+          http:
+            paths:
+      {{- range $p := $ingressValues.paths }}
+              - path: {{ tpl $p $ }}
+                {{- if and $pathType $ingressSupportsPathType }}
+                pathType: {{ $pathType }}
+                {{- end }}
+                backend:
+                  {{- if $apiIsStable }}
+                  service:
+                    name: {{ include "kube-prometheus-stack.fullname" $ }}-prometheus-{{ $i }}
+                    port:
+                      number: {{ $servicePort }}
+                  {{- else }}
+                  serviceName: {{ include "kube-prometheus-stack.fullname" $ }}-prometheus-{{ $i }}
+                  servicePort: {{ $servicePort }}
+      {{- end }}
+      {{- end -}}
       {{- if or $ingressValues.tlsSecretName $ingressValues.tlsSecretPerReplica.enabled }}
       tls:
         - hosts:
